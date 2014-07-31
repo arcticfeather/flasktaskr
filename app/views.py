@@ -20,9 +20,15 @@ def login_required(test):
 			return redirect(url_for('login'))
 	return wrap
 
+def flash_errors(form):
+	for field, errors in form.errors.items():
+		for error in errors:
+			flash(u"Error in the %s field - %s" % (getattr(form, field).label.text,error), 'error')
+
 @app.route('/logout')
 def logout():
 	session.pop('logged_in', None)
+	session.pop('user_id', None)
 	flash('You are logged out. Bye. :(')
 	return redirect(url_for('login'))
 
@@ -35,6 +41,7 @@ def login():
 			error = "Invalid username or password."
 		else:
 			session['logged_in'] = True
+			session['user_id'] = u.id
 			flash('You are logged in.')
 			return redirect(url_for('tasks'))
 	return render_template('login.html', form=LoginForm(request.form), error=error)
@@ -53,6 +60,8 @@ def register():
 		db.session.commit()
 		flash('Thanks for registering. Please login')
 		return redirect(url_for('login'))
+	else:
+		flash_errors(form)
 	return render_template('register.html', form=form, error=error)
 
 @app.route('/tasks/')
@@ -74,11 +83,13 @@ def new_task():
 			form.priority.data,
 			form.posted_date.data,
 			'1',
-			'1')
+			session['user_id'])
 		db.session.add(new_task)
 		db.session.commit()
 		flash('New entry was sucessfully posted. Thanks.')
 		return redirect(url_for('tasks'))
+	else:
+		flash_errors(form)
 
 # Mark tasks as complete
 @app.route('/complete/<int:task_id>/',)
