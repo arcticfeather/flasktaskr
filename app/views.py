@@ -72,6 +72,8 @@ def new_task():
 			form.name.data,
 			form.due_date.data,
 			form.priority.data,
+			form.posted_date.data,
+			'1',
 			'1')
 		db.session.add(new_task)
 		db.session.commit()
