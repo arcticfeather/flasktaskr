@@ -20,10 +20,14 @@ class Users(unittest.TestCase):
 		db.drop_all()
 
 	# each test should start with 'test'
-	def test_user_setup(self):
+	def test_users_can_register(self):
 		new_user = User("newusername", "new@username.com","password")
 		db.session.add(new_user)
 		db.session.commit()
+		test = db.session.query(User).all()
+		for t in test:
+			t.name
+		assert t.name == "newusername"
 
 if __name__ == "__main__":
 	unittest.main()
